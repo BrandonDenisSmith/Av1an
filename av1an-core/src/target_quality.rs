@@ -36,6 +36,7 @@ pub struct TargetQuality {
   pub video_params: Vec<String>,
   pub vspipe_args: Vec<String>,
   pub probe_slow: bool,
+  pub probe_preset: String,
 }
 
 impl TargetQuality {
@@ -157,6 +158,7 @@ impl TargetQuality {
       vmaf_threads,
       self.video_params.clone(),
       self.probe_slow,
+      self.probe_preset.clone(),
     );
 
     let future = async {

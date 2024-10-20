@@ -525,6 +525,12 @@ pub struct CliOpts {
   #[clap(long, help_heading = "Target Quality")]
   pub probe_slow: bool,
 
+  /// Encoder preset to use during probes
+  /// 
+  /// Note that this parameter is overriden if --probe-slow is specified.
+  #[clap(long, help_heading = "Target Quality")]
+  pub probe_preset: Option<String>,
+
   /// Lower bound for target quality Q-search early exit
   ///
   /// If min_q is tested and the probe's VMAF score is lower than target_quality, the Q-search early exits and
@@ -577,6 +583,16 @@ impl CliOpts {
         video_params: video_params.clone(),
         vspipe_args: self.vspipe_args.clone(),
         probe_slow: self.probe_slow,
+        probe_preset: self.probe_preset.clone().unwrap_or_else(|| {
+          match self.encoder {
+            Encoder::aom => "6".to_string(),
+            Encoder::rav1e => "10".to_string(),
+            Encoder::vpx => "9".to_string(),
+            Encoder::svt_av1 => "12".to_string(),
+            Encoder::x264 => "medium".to_string(),
+            Encoder::x265 => "fast".to_string(),
+          }
+        }),
         probing_rate: adapt_probing_rate(self.probing_rate as usize),
       }
     })

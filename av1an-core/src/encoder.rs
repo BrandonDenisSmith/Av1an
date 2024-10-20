@@ -586,6 +586,7 @@ impl Encoder {
     self,
     threads: usize,
     q: usize,
+    probe_preset: String,
   ) -> Vec<Cow<'static, str>> {
     match &self {
       Self::aom => inplace_vec![
@@ -597,7 +598,7 @@ impl Encoder {
         "--end-usage=q",
         "-b",
         "8",
-        "--cpu-used=6",
+        format!("--cpu-used={probe_preset}"),
         format!("--cq-level={q}"),
         "--enable-filter-intra=0",
         "--enable-smooth-intra=0",
@@ -621,7 +622,7 @@ impl Encoder {
         "rav1e",
         "-y",
         "-s",
-        "10",
+        probe_preset,
         "--threads",
         threads.to_string(),
         "--tiles",
@@ -642,7 +643,7 @@ impl Encoder {
         "--pass=1",
         "--codec=vp9",
         format!("--threads={threads}"),
-        "--cpu-used=9",
+        format!("--cpu-used={probe_preset}"),
         "--end-usage=q",
         format!("--cq-level={q}"),
         "--row-mt=1",
@@ -720,7 +721,7 @@ impl Encoder {
             "--lp",
             threads.to_string(),
             "--preset",
-            "12",
+            probe_preset,
             "--keyint",
             "240",
             "--crf",
@@ -743,7 +744,7 @@ impl Encoder {
         "--threads",
         threads.to_string(),
         "--preset",
-        "medium",
+        probe_preset,
         "--crf",
         q.to_string(),
       ],
@@ -756,7 +757,7 @@ impl Encoder {
         "--frame-threads",
         cmp::min(threads, 16).to_string(),
         "--preset",
-        "fast",
+        probe_preset,
         "--crf",
         q.to_string(),
       ],
@@ -824,6 +825,7 @@ impl Encoder {
     vmaf_threads: usize,
     mut video_params: Vec<String>,
     probe_slow: bool,
+    probe_preset: String,
   ) -> (Vec<String>, Vec<Cow<'static, str>>) {
     let pipe = compose_ffmpeg_pipe(
       [
@@ -859,7 +861,7 @@ impl Encoder {
 
       ps
     } else {
-      self.construct_target_quality_command(vmaf_threads, q)
+      self.construct_target_quality_command(vmaf_threads, q, probe_preset)
     };
 
     let output: Vec<Cow<str>> = match self {
